@@ -16,10 +16,12 @@ def euclidean_distance(x1, x2):
 
 
 class KMeans:
-    def __init__(self, K=5, max_iters=100, plot_steps=False):
+    def __init__(self, K=5, max_iters=100, plot_steps=False, feature_index_1=0, feature_index_2=1):
         self.K = K
         self.max_iters = max_iters
         self.plot_steps = plot_steps
+        self.feature_index_1 = feature_index_1
+        self.feature_index_2 = feature_index_2
 
         # list of sample indices for each cluster
         self.clusters = [[] for _ in range(self.K)]
@@ -94,15 +96,18 @@ class KMeans:
         ]
         return sum(distances) == 0
 
+    # Need 2 feature indices to plot on a 2D plot
     def plot(self):
         fig, ax = plt.subplots(figsize=(12, 8))
 
         for i, index in enumerate(self.clusters):
-            point = self.X[index].T
-            ax.scatter(*point)
+            point = [self.X[index].T[self.feature_index_1], self.X[index].T[self.feature_index_2]]
+            ax.scatter(*point, linewidth=4)
 
-        for point in self.centroids:
-            ax.scatter(*point, marker="x", color="black", linewidth=2)
+        for c in self.centroids:
+            point = [c[self.feature_index_1], c[self.feature_index_2]]
+            #ax.scatter(*point, marker="x", color="black", linewidth=2)
+            ax.scatter(*point, marker="x", color="black", s=500, linewidth=5)
 
         plt.show()
 

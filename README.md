@@ -1,3 +1,12 @@
+## Usage
+This project looks at classifying the iris dataset with the features 'sepal length (cm)', 'sepal width (cm)', 'petal length (cm)', and 'petal width (cm)'
+
+Run the python files prepended with run_, e.g.,
+```
+python run_kmeans.py
+```
+To adjust parameters such as plotting, adjust the inputs at the top of the source code.
+
 ## Credit
 Much of this work is derived from other sources, see files for sources.
 
@@ -8,3 +17,5 @@ Histogram output of the preprocessing:
 Scatter plot output of the preprocessing:
 ![scatterplots](scatter-plots.png "Scatter plots of the data")
 
+Example output of KMeans between `sepal width (cm)` and `petal width (cm)`:
+![kmeans](kmeans.png "KMeans scatter plot - sepal width vs petal width")

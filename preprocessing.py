@@ -22,6 +22,7 @@ import seaborn as sns  # For advanced plotting and visualization
 from sklearn.datasets import load_iris  # To load the Iris dataset
 import pandas as pd  # For data manipulation and analysis
 from sklearn.preprocessing import LabelEncoder # To convert from species to ints
+from sklearn.preprocessing import MinMaxScaler # For normalization
 
 class Preprocessor:
     def __init__(self, plot=False):
@@ -64,7 +65,13 @@ class Preprocessor:
         y = label_encoder.fit_transform(y_names)
         # Convert from dataframe to X and y
         X = iris_df.drop('species', axis=1).values  # Features (everything except the target column)
-        return X, y, iris_df
+        # Normalize X with min-max normalization
+        # Initialize the MinMaxScaler
+        scaler_X = MinMaxScaler()
+        
+        # Fit and transform the data
+        X_normalized = scaler_X.fit_transform(X)
+        return X_normalized, y, iris_df
             
 if __name__ == "__main__":
     p = Preprocessor(plot=False)

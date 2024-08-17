@@ -8,15 +8,13 @@
 from logistic_regression import LogisticRegression
 from preprocessing import Preprocessor
 import numpy as np
-    
+from sklearn.model_selection import train_test_split
+
+def accuracy(y_true, y_pred) -> float:
+    accuracy = np.sum(y_true == y_pred) / len(y_true)
+    return accuracy
+
 if __name__ == "__main__":
-    # Imports
-    from sklearn.model_selection import train_test_split
-
-    def accuracy(y_true, y_pred):
-        accuracy = np.sum(y_true == y_pred) / len(y_true)
-        return accuracy
-
     preprocessor = Preprocessor()
     X, y, iris_df = preprocessor.preprocess_iris()
 

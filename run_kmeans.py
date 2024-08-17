@@ -8,6 +8,7 @@
 from kmeans import KMeans
 from preprocessing import Preprocessor
 import numpy as np
+from sklearn.metrics import accuracy_score
 
 if __name__ == "__main__":
     # INPUT: Select 2 feature indices to plot on the 2D plot: 0, 1, 2, or 3
@@ -29,3 +30,7 @@ if __name__ == "__main__":
     
     # TODO: add the x and y labels to plots based on iris_df.columns
     k.plot()
+    
+    # Accuracy
+    accuracy = accuracy_score(y, y_pred)
+    print(f"Accuracy: {accuracy:.3f}")

@@ -1,0 +1,155 @@
+#Part 2  without sklearn ----------------------------------------------------------
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+np.random.seed(42)
+
+# Define custom function to load the Iris dataset
+def load_iris():
+    # Iris dataset URL
+    url = "https://archive.ics.uci.edu/ml/machine-learning-databases/iris/iris.data"
+    # Column names as per the Iris dataset
+    feature_names = ["sepal length", "sepal width", "petal length", "petal width"]
+    # Load the data
+    data = np.genfromtxt(url, delimiter=',', usecols=range(4), dtype=float)
+    # Load the target labels
+    target = np.genfromtxt(url, delimiter=',', usecols=4, dtype=str)
+    target = np.where(target == 'Iris-setosa', 0, np.where(target == 'Iris-versicolor', 1, 2))
+    return data, target, feature_names
+
+# Define function to standardize features
+def standardize(X):
+    mean = np.mean(X, axis=0)
+    std = np.std(X, axis=0)
+    return (X - mean) / std
+
+def euclidean_distance(x1, x2):
+    return np.sqrt(np.sum((x1 - x2) ** 2))
+
+class KMeans:
+    def __init__(self, K=5, max_iters=100, plot_steps=False, feature_index_1=0, feature_index_2=1):
+        self.K = K
+        self.max_iters = max_iters
+        self.plot_steps = plot_steps
+        self.feature_index_1 = feature_index_1
+        self.feature_index_2 = feature_index_2
+
+        # List of sample indices for each cluster
+        self.clusters = [[] for _ in range(self.K)]
+        # The centers (mean feature vector) for each cluster
+        self.centroids = []
+
+    def predict(self, X):
+        self.X = X
+        self.n_samples, self.n_features = X.shape
+
+        # Initialize centroids
+        random_sample_idxs = np.random.choice(self.n_samples, self.K, replace=False)
+        self.centroids = [self.X[idx] for idx in random_sample_idxs]
+
+        for _ in range(self.max_iters):
+            # Assign samples to the closest centroids
+            self.clusters = self._create_clusters(self.centroids)
+
+            if self.plot_steps:
+                self.plot()
+
+            centroids_old = self.centroids
+            self.centroids = self._get_centroids(self.clusters)
+
+            if self._is_converged(centroids_old, self.centroids):
+                break
+
+            if self.plot_steps:
+                self.plot()
+
+        # Return inertia
+        return self._calculate_inertia(self.clusters, self.centroids)
+
+    def _create_clusters(self, centroids):
+        # Assign the samples to the closest centroids to create clusters
+        clusters = [[] for _ in range(self.K)]
+        for idx, sample in enumerate(self.X):
+            centroid_idx = self._closest_centroid(sample, centroids)
+            clusters[centroid_idx].append(idx)
+        return clusters
+
+    def _closest_centroid(self, sample, centroids):
+        # Distance of the current sample to each centroid
+        distances = [euclidean_distance(sample, point) for point in centroids]
+        closest_index = np.argmin(distances)
+        return closest_index
+
+    def _get_centroids(self, clusters):
+        # Assign mean value of clusters to centroids
+        centroids = np.zeros((self.K, self.n_features))
+        for cluster_idx, cluster in enumerate(clusters):
+            cluster_mean = np.mean(self.X[cluster], axis=0)
+            centroids[cluster_idx] = cluster_mean
+        return centroids
+
+    def _is_converged(self, centroids_old, centroids):
+        # Distances between each old and new centroid, for all centroids
+        distances = [
+            euclidean_distance(centroids_old[i], centroids[i]) for i in range(self.K)
+        ]
+        return sum(distances) == 0
+
+    def _calculate_inertia(self, clusters, centroids):
+        inertia = 0
+        for cluster_idx, cluster in enumerate(clusters):
+            for sample_idx in cluster:
+                inertia += euclidean_distance(self.X[sample_idx], centroids[cluster_idx]) ** 2
+        return inertia
+
+    def plot(self):
+        fig, ax = plt.subplots(figsize=(12, 8))
+
+        for i, index in enumerate(self.clusters):
+            point = [self.X[index].T[self.feature_index_1], self.X[index].T[self.feature_index_2]]
+            ax.scatter(*point, linewidth=4, label=f'Cluster {i+1}')
+
+        for c in self.centroids:
+            point = [c[self.feature_index_1], c[self.feature_index_2]]
+            ax.scatter(*point, marker="x", color="black", s=500, linewidth=5, label='Centroids')
+
+        ax.set_title('KMeans Clustering Results')
+        ax.set_xlabel(f'{self.feature_names[self.feature_index_1]}')
+        ax.set_ylabel(f'{self.feature_names[self.feature_index_2]}')
+        ax.legend()
+        plt.show()
+
+def plot_elbow_curve(X, k_range):
+    inertia_values = []
+    for k in k_range:
+        kmeans = KMeans(K=k, max_iters=150)
+        inertia = kmeans.predict(X)  # Obtain inertia
+        inertia_values.append(inertia)
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(k_range, inertia_values, marker='o')
+    plt.xlabel('Number of Clusters (K)')
+    plt.ylabel('Inertia')
+    plt.title('Elbow Curve for Optimal K')
+    plt.grid(True)
+    plt.show()
+
+# Testing with Iris Dataset
+if __name__ == "__main__":
+    # Load Iris dataset
+    X, y, feature_names = load_iris()
+
+    # Standardize features
+    X_scaled = standardize(X)
+
+    # Determine the optimal number of clusters using the elbow method
+    k_range = range(1, 11)  # Adjust the range as needed
+    plot_elbow_curve(X_scaled, k_range)
+
+    # Run KMeans with the optimal number of clusters
+    optimal_k = 3  # Replace this with the observed optimal K from the elbow curve
+    kmeans = KMeans(K=optimal_k, max_iters=150, plot_steps=True, feature_index_1=2, feature_index_2=3)
+    kmeans.feature_names = feature_names
+    y_pred = kmeans.predict(X_scaled)
+    kmeans.plot()

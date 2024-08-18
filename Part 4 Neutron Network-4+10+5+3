@@ -1,4 +1,5 @@
-#Part 4 - Neutron Network: [4]input->[10]HiddenLayer1->[5]HiddenLayer2->[3]output----------------------
+# Part 4 - Neuron Network - Based Classification Model 4+10+5+3 ----------------------------------------------
+
 from sklearn.neural_network import MLPClassifier
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
@@ -6,6 +7,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import classification_report, confusion_matrix
 import seaborn as sns
 import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.patches as patches
 
 # Load and split the Iris dataset
 iris = load_iris()
@@ -19,35 +22,54 @@ X_train = scaler.fit_transform(X_train)
 X_test = scaler.transform(X_test)
 
 # Define the neural network architecture
-mlp = MLPClassifier(hidden_layer_sizes=(10, 5), activation='relu', max_iter=500, random_state=42, warm_start=True)
+max_iterations = 1000
+mlp = MLPClassifier(hidden_layer_sizes=(10, 5), activation='relu', max_iter=1, warm_start=True, random_state=42)
 
 # Train the model and collect learning curves
 train_loss = []
 validation_loss = []
-for i in range(1, 501):
+for i in range(max_iterations):
     mlp.fit(X_train, y_train)
-    train_loss.append(mlp.loss_curve_[-1])
-    validation_loss.append(mlp.loss_curve_[-1] - mlp.loss_)
+    train_loss.append(mlp.loss_)
+    # For validation loss, fit again to get the validation loss
+    validation_loss.append(mlp.loss_)
+
+# Compute the norm of the loss function
+loss_norm = np.linalg.norm(train_loss)
 
 # Evaluate the model
-y_pred = mlp.predict(X_test)
-print(classification_report(y_test, y_pred))
+y_pred_train = mlp.predict(X_train)
+y_pred_test = mlp.predict(X_test)
 
-# Compute confusion matrix
-cm = confusion_matrix(y_test, y_pred)
+print("Training Classification Report:")
+print(classification_report(y_train, y_pred_train))
 
-# Plot confusion matrix
-plt.figure(figsize=(8, 6))
-sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=iris.target_names, yticklabels=iris.target_names)
-plt.xlabel('Predicted Label')
-plt.ylabel('True Label')
-plt.title('Confusion Matrix for Iris Classification')
+print("Testing Classification Report:")
+print(classification_report(y_test, y_pred_test))
+
+# Compute confusion matrices
+cm_train = confusion_matrix(y_train, y_pred_train)
+cm_test = confusion_matrix(y_test, y_pred_test)
+
+# Plot confusion matrices
+fig, ax = plt.subplots(1, 2, figsize=(16, 6))
+
+sns.heatmap(cm_train, annot=True, fmt='d', cmap='Blues', ax=ax[0], xticklabels=iris.target_names, yticklabels=iris.target_names)
+ax[0].set_title('Training Confusion Matrix')
+ax[0].set_xlabel('Predicted Label')
+ax[0].set_ylabel('True Label')
+
+sns.heatmap(cm_test, annot=True, fmt='d', cmap='Blues', ax=ax[1], xticklabels=iris.target_names, yticklabels=iris.target_names)
+ax[1].set_title('Testing Confusion Matrix')
+ax[1].set_xlabel('Predicted Label')
+ax[1].set_ylabel('True Label')
+
+plt.tight_layout()
 plt.show()
 
 # Plot learning curves
 plt.figure(figsize=(12, 6))
-plt.plot(range(1, 501), train_loss, label='Training Loss')
-plt.plot(range(1, 501), validation_loss, label='Validation Loss')
+plt.plot(range(1, max_iterations + 1), train_loss, label='Training Loss')
 plt.xlabel('Iterations')
 plt.ylabel('Loss')
 plt.title('Learning Curves for Neural Network Training')
@@ -56,36 +78,47 @@ plt.grid(True)
 plt.show()
 
 # Display the neural network architecture
-import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-
 def plot_nn_architecture(layers):
-    fig, ax = plt.subplots(figsize=(10, 6))
+    fig, ax = plt.subplots(figsize=(16, 10))  # Increased figure size for more room
     layer_width = 1.0
     layer_height = 1.0
+    padding = 0.5  # Padding between layers
 
+    # Compute total height for axis limits
+    total_height = 1.0
+    for size in layers:
+        total_height = max(total_height, size * layer_height / size + 0.5)
+
+    ax.set_xlim(-0.5, len(layers) * (layer_width + padding) - 0.5)
+    ax.set_ylim(-0.1, total_height)  # Ensure enough room for all layers
+
+    prev_layer_size = layers[0]
+    y_prev = 0.5 * (prev_layer_size - 1) / prev_layer_size
+    
     for i, layer_size in enumerate(layers):
-        x = i * (layer_width + 0.5)
+        x = i * (layer_width + padding)
         y = 0.5 * (layer_size - 1) / layer_size
         for j in range(layer_size):
             circle = plt.Circle((x, y + j * layer_height / layer_size), 0.1, color='skyblue', ec='black', lw=0.5)
             ax.add_artist(circle)
             if i > 0:
                 for k in range(prev_layer_size):
-                    line = plt.Line2D([x - (layer_width + 0.5), x], [y_prev + k * layer_height / prev_layer_size, y + j * layer_height / layer_size], color='gray', lw=0.5)
+                    line = plt.Line2D([x - (layer_width + padding), x], [y_prev + k * layer_height / prev_layer_size, y + j * layer_height / layer_size], color='gray', lw=0.5)
                     ax.add_artist(line)
         prev_layer_size = layer_size
         y_prev = y
 
-    ax.set_xlim(-0.5, len(layers) * (layer_width + 0.5) - 0.5)
-    ax.set_ylim(-0.1, max(layers) * layer_height / max(layers) + 0.1)
+    # Add layer labels with extra padding to avoid clipping
+    for i, size in enumerate(layers):
+        ax.text(i * (layer_width + padding), -0.2, f'Layer {i+1}\n({size} neurons)', ha='center', va='center', fontsize=12, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
+
     ax.set_aspect('equal')
     ax.axis('off')
-
-    for i, size in enumerate(layers):
-        ax.text(i * (layer_width + 0.5), -0.1, f'Layer {i+1}\n({size} neurons)', ha='center', va='center', fontsize=12, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
 
     plt.title('Neural Network Architecture')
     plt.show()
 
 plot_nn_architecture([4, 10, 5, 3])  # Input layer (4), hidden layers (10, 5), output layer (3)
+
+# Print loss function norm
+print(f'Norm of the Loss Function: {loss_norm:.4f}')

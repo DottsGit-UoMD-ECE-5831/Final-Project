@@ -2,6 +2,8 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+import seaborn as sns
 
 np.random.seed(42)
 
@@ -50,7 +52,7 @@ class KMeans:
             if self._is_converged(centroids_old, self.centroids):
                 break
 
-        return self._calculate_inertia(self.clusters, self.centroids)
+        return self._assign_cluster_labels(self.clusters)
 
     def _create_clusters(self, centroids):
         clusters = [[] for _ in range(self.K)]
@@ -76,12 +78,12 @@ class KMeans:
         distances = [euclidean_distance(centroids_old[i], centroids[i]) for i in range(self.K)]
         return np.all(np.array(distances) < 1e-6)
 
-    def _calculate_inertia(self, clusters, centroids):
-        inertia = 0
+    def _assign_cluster_labels(self, clusters):
+        labels = np.empty(self.n_samples)
         for cluster_idx, cluster in enumerate(clusters):
             for sample_idx in cluster:
-                inertia += euclidean_distance(self.X[sample_idx], centroids[cluster_idx]) ** 2
-        return inertia
+                labels[sample_idx] = cluster_idx
+        return labels
 
     def plot(self, true_labels, title_suffix=''):
         fig, ax = plt.subplots(figsize=(12, 8))
@@ -120,6 +122,20 @@ def plot_elbow_curve(X, k_range):
     plt.show()
 
 def plot_clusters_for_optimal_k(X, y, optimal_k, feature_indices):
+    kmeans = KMeans(K=optimal_k, max_iters=150, feature_index_1=feature_indices[0], feature_index_2=feature_indices[1])
+    kmeans.feature_names = feature_names
+    cluster_labels = kmeans.predict(X)
+    
+    # Calculate confusion matrix
+    confusion = confusion_matrix(y, cluster_labels)
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(confusion, annot=True, fmt='d', cmap='Blues', xticklabels=np.arange(optimal_k), yticklabels=np.arange(3))
+    plt.xlabel('Cluster Label')
+    plt.ylabel('True Label')
+    plt.title(f'Confusion Matrix for K={optimal_k}')
+    plt.show()
+
+    # Plot clustering results
     for i in range(10):  # Plot 10 iterations for the optimal K
         kmeans = KMeans(K=optimal_k, max_iters=150, feature_index_1=feature_indices[0], feature_index_2=feature_indices[1])
         kmeans.feature_names = feature_names

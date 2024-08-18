@@ -1,0 +1,91 @@
+#Part 4 - Neutron Network: [4]input->[10]HiddenLayer1->[5]HiddenLayer2->[3]output----------------------
+from sklearn.neural_network import MLPClassifier
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import classification_report, confusion_matrix
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Load and split the Iris dataset
+iris = load_iris()
+X = iris.data
+y = iris.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Standardize the features
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Define the neural network architecture
+mlp = MLPClassifier(hidden_layer_sizes=(10, 5), activation='relu', max_iter=500, random_state=42, warm_start=True)
+
+# Train the model and collect learning curves
+train_loss = []
+validation_loss = []
+for i in range(1, 501):
+    mlp.fit(X_train, y_train)
+    train_loss.append(mlp.loss_curve_[-1])
+    validation_loss.append(mlp.loss_curve_[-1] - mlp.loss_)
+
+# Evaluate the model
+y_pred = mlp.predict(X_test)
+print(classification_report(y_test, y_pred))
+
+# Compute confusion matrix
+cm = confusion_matrix(y_test, y_pred)
+
+# Plot confusion matrix
+plt.figure(figsize=(8, 6))
+sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=iris.target_names, yticklabels=iris.target_names)
+plt.xlabel('Predicted Label')
+plt.ylabel('True Label')
+plt.title('Confusion Matrix for Iris Classification')
+plt.show()
+
+# Plot learning curves
+plt.figure(figsize=(12, 6))
+plt.plot(range(1, 501), train_loss, label='Training Loss')
+plt.plot(range(1, 501), validation_loss, label='Validation Loss')
+plt.xlabel('Iterations')
+plt.ylabel('Loss')
+plt.title('Learning Curves for Neural Network Training')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+# Display the neural network architecture
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+
+def plot_nn_architecture(layers):
+    fig, ax = plt.subplots(figsize=(10, 6))
+    layer_width = 1.0
+    layer_height = 1.0
+
+    for i, layer_size in enumerate(layers):
+        x = i * (layer_width + 0.5)
+        y = 0.5 * (layer_size - 1) / layer_size
+        for j in range(layer_size):
+            circle = plt.Circle((x, y + j * layer_height / layer_size), 0.1, color='skyblue', ec='black', lw=0.5)
+            ax.add_artist(circle)
+            if i > 0:
+                for k in range(prev_layer_size):
+                    line = plt.Line2D([x - (layer_width + 0.5), x], [y_prev + k * layer_height / prev_layer_size, y + j * layer_height / layer_size], color='gray', lw=0.5)
+                    ax.add_artist(line)
+        prev_layer_size = layer_size
+        y_prev = y
+
+    ax.set_xlim(-0.5, len(layers) * (layer_width + 0.5) - 0.5)
+    ax.set_ylim(-0.1, max(layers) * layer_height / max(layers) + 0.1)
+    ax.set_aspect('equal')
+    ax.axis('off')
+
+    for i, size in enumerate(layers):
+        ax.text(i * (layer_width + 0.5), -0.1, f'Layer {i+1}\n({size} neurons)', ha='center', va='center', fontsize=12, bbox=dict(facecolor='white', edgecolor='black', boxstyle='round,pad=0.5'))
+
+    plt.title('Neural Network Architecture')
+    plt.show()
+
+plot_nn_architecture([4, 10, 5, 3])  # Input layer (4), hidden layers (10, 5), output layer (3)

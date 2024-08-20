@@ -1,15 +1,16 @@
 # "You can use the codes in this YouTube channel for from-scratch
 # implementations if you clearly state that you are using the codes in this channel."
 
-# Copied from:      Patrick Loeber
+# Forked from:      Patrick Loeber
 #                   https://www.youtube.com/playlist?list=PLqnslRFeH2Upcrywf-u2etjdxxkL8nl7E
 #                   https://github.com/patrickloeber/MLfromscratch/blob/7f0f18ada1f75d1999a5206b5126459d51f73dce/mlfromscratch/logistic_regression.py
 
 
 import numpy as np
+from sklearn.base import BaseEstimator, ClassifierMixin
 
-
-class LogisticRegression:
+# Derive from sklearn class for compatibility with sklearn cross validation
+class LogisticRegression(BaseEstimator, ClassifierMixin):
     def __init__(self, learning_rate=0.001, n_iters=1000):
         self.lr = learning_rate
         self.n_iters = n_iters
@@ -42,6 +43,19 @@ class LogisticRegression:
         y_predicted = self._sigmoid(linear_model)
         y_predicted_cls = [1 if i > 0.5 else 0 for i in y_predicted]
         return np.array(y_predicted_cls)
+    
+    # Imitate sklearn's score() function
+    def score(self, X_test, y_true):
+        y_pred = self.predict(X_test)
+        return np.sum(y_true == y_pred) / len(y_true)
+
+    # Imitate sklearn's get_params() to work with xvalidation
+    def get_params(self, deep=False):
+        return {}
+
+    # Imitate sklearn's set_params() to work with xvalidation
+    def set_params(self, **params):
+        return self
 
     def _sigmoid(self, x):
         return 1 / (1 + np.exp(-x))
@@ -68,4 +82,4 @@ if __name__ == "__main__":
     regressor.fit(X_train, y_train)
     predictions = regressor.predict(X_test)
 
-    print("LR classification accuracy:", accuracy(y_test, predictions))
+    print(f"LR classification accuracy: {accuracy(y_test, predictions):.3f}")

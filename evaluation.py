@@ -11,13 +11,14 @@ class Evaluation:
         # Evaluate the model's performance
         accuracy = accuracy_score(y_test, y_pred)
         conf_matrix = confusion_matrix(y_test, y_pred)
-        class_report = classification_report(y_test, y_pred)
+        class_report = classification_report(y_test, y_pred, zero_division=0)
         
         # Print the results (incl accuracy, precision, and recall)
-        print("Test Set Accuracy:", accuracy)
+        print(f"Test Set Accuracy: {accuracy:.3f}")
         print("\nConfusion Matrix:\n", conf_matrix)
         print("\nClassification Report:\n", class_report)
         
+    # classifier contains fit() and predict() and score()
     def kfold_cross_validate(self, X, y, classifier, num_folds=12, random_state=321):
         # Cross-validation
         # Code snippet derived from: 

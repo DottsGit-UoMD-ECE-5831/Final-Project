@@ -14,15 +14,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'Part_3_Logistical_Regre
 from Part_1_Preprocessing.preprocessing import Preprocessor
 from Part_3_Logistical_Regression.logistic_regression import LogisticRegression
 import numpy as np
-    
+from sklearn.model_selection import train_test_split
+
+def accuracy(y_true, y_pred) -> float:
+    accuracy = np.sum(y_true == y_pred) / len(y_true)
+    return accuracy
+
 if __name__ == "__main__":
-    # Imports
-    from sklearn.model_selection import train_test_split
-
-    def accuracy(y_true, y_pred):
-        accuracy = np.sum(y_true == y_pred) / len(y_true)
-        return accuracy
-
     preprocessor = Preprocessor()
     X, y, iris_df = preprocessor.preprocess_iris()
 

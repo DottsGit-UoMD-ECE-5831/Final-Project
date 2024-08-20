@@ -28,10 +28,10 @@ if __name__ == "__main__":
 
     print(X.shape)
 
-    clusters = len(np.unique(y))
-    print(clusters)
+    num_clusters = len(np.unique(y))
+    print(num_clusters)
 
-    k = KMeans(K=clusters, max_iters=150, plot_steps=True, feature_index_1=PLOT_FEATURE_1, feature_index_2=PLOT_FEATURE_2)
+    k = KMeans(K=num_clusters, max_iters=150, plot_steps=True, feature_index_1=PLOT_FEATURE_1, feature_index_2=PLOT_FEATURE_2)
     y_pred = k.predict(X)
     
     # TODO: add the x and y labels to plots based on iris_df.columns

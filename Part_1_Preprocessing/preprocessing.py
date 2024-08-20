@@ -23,12 +23,20 @@ from sklearn.datasets import load_iris  # To load the Iris dataset
 import pandas as pd  # For data manipulation and analysis
 from sklearn.preprocessing import LabelEncoder # To convert from species to ints
 from sklearn.preprocessing import MinMaxScaler # For normalization
+from typing import Tuple # For return values
+import numpy as np # For return values
 
 class Preprocessor:
     def __init__(self, plot=False):
         self.plot = plot
 
-    def preprocess_iris(self):
+    def preprocess_iris(self) -> Tuple[np.ndarray, np.ndarray, pd.DataFrame]:
+        """
+        Preprocess the Iris dataset.
+
+        Returns:
+            Tuple[np.ndarray, np.ndarray, pd.DataFrame]: Normalized features, encoded target, and original dataframe
+        """
         # Load the Iris dataset
         iris = load_iris()  # Load the dataset from sklearn
         # Convert the dataset into a Pandas DataFrame with appropriate column names
@@ -64,14 +72,14 @@ class Preprocessor:
         label_encoder = LabelEncoder()
         y = label_encoder.fit_transform(y_names)
         # Convert from dataframe to X and y
-        X = iris_df.drop('species', axis=1).values  # Features (everything except the target column)
+        X = iris_df.drop('species', axis=1).to_numpy()  # Features (everything except the target column)
         # Normalize X with min-max normalization
         # Initialize the MinMaxScaler
-        scaler_X = MinMaxScaler()
+        scaler_x = MinMaxScaler()
         
         # Fit and transform the data
-        X_normalized = scaler_X.fit_transform(X)
-        return X_normalized, y, iris_df
+        x_normalized = scaler_x.fit_transform(X)
+        return x_normalized, y, iris_df
             
 if __name__ == "__main__":
     p = Preprocessor(plot=False)

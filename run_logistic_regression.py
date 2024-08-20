@@ -5,8 +5,14 @@
 #                            https://www.youtube.com/playlist?list=PLqnslRFeH2Upcrywf-u2etjdxxkL8nl7E
 #                            https://github.com/patrickloeber/MLfromscratch/blob/7f0f18ada1f75d1999a5206b5126459d51f73dce/mlfromscratch/kmeans.py
 
-from logistic_regression import LogisticRegression
-from preprocessing import Preprocessor
+# Adding directories for imports
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), 'Part_1_Preprocessing'))
+sys.path.append(os.path.join(os.path.dirname(__file__), 'Part_3_Logistical_Regression'))
+
+from Part_1_Preprocessing.preprocessing import Preprocessor
+from Part_3_Logistical_Regression.logistic_regression import LogisticRegression
 import numpy as np
     
 if __name__ == "__main__":

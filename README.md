@@ -12,10 +12,10 @@ Much of this work is derived from other sources, see files for sources.
 
 ## Images
 Histogram output of the preprocessing:
-![histograms](histograms.png "Histogram of the data")
+![histograms](images/histograms.png "Histogram of the data")
 
 Scatter plot output of the preprocessing:
-![scatterplots](scatter-plots.png "Scatter plots of the data")
+![scatterplots](images/scatter-plots.png "Scatter plots of the data")
 
 Example output of KMeans between `sepal width (cm)` and `petal width (cm)`:
-![kmeans](kmeans.png "KMeans scatter plot - sepal width vs petal width")
+![kmeans](images/kmeans.png "KMeans scatter plot - sepal width vs petal width")

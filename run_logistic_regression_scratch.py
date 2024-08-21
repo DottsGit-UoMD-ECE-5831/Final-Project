@@ -8,6 +8,7 @@
 # Adding directories for imports
 import sys
 import os
+from evaluation import Evaluation
 sys.path.append(os.path.join(os.path.dirname(__file__), 'Part_1_Preprocessing'))
 sys.path.append(os.path.join(os.path.dirname(__file__), 'Part_3_Logistical_Regression'))
 
@@ -25,11 +26,14 @@ if __name__ == "__main__":
     X, y, iris_df = preprocessor.preprocess_iris()
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=1234
+        X, y, test_size=0.3, random_state=1234
     )
 
-    regressor = LogisticRegression(learning_rate=0.0001, n_iters=1000)
+    regressor = LogisticRegression(learning_rate=0.75, n_iters=2000)
     regressor.fit(X_train, y_train)
-    predictions = regressor.predict(X_test)
+    y_pred = regressor.predict(X_test)
 
-    print("LR classification accuracy:", accuracy(y_test, predictions))
+    # Evaluate the model's performance
+    e = Evaluation()
+    e.evaluate(y_test, y_pred)
+    e.kfold_cross_validate(X, y, classifier=regressor)

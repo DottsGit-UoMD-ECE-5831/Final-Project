@@ -17,7 +17,8 @@ if __name__ == "__main__":
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=123)
     
     # Initialize the Logistic Regression model
-    clf = LogisticRegression()
+    # Use One-vs-Rest (OvR) to match from-scratch implementation
+    clf = LogisticRegression(multi_class='ovr')
     
     # Fit the model to the training data
     clf.fit(X_train, y_train)

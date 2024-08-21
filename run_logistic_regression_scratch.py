@@ -26,10 +26,10 @@ if __name__ == "__main__":
     X, y, iris_df = preprocessor.preprocess_iris()
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X, y, test_size=0.2, random_state=1234
+        X, y, test_size=0.3, random_state=1234
     )
 
-    regressor = LogisticRegression(learning_rate=0.0001, n_iters=1000)
+    regressor = LogisticRegression(learning_rate=0.75, n_iters=2000)
     regressor.fit(X_train, y_train)
     y_pred = regressor.predict(X_test)
 

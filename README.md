@@ -4,6 +4,8 @@ This project looks at classifying the iris dataset with the features 'sepal leng
 Run the python files prepended with run_, e.g.,
 ```
 python run_kmeans.py
+python run_logistic_regression_scratch.py
+python run_logistic_regression_sklearn.py
 ```
 To adjust parameters such as plotting, adjust the inputs at the top of the source code.
 
